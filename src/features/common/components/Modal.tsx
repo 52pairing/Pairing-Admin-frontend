@@ -132,7 +132,7 @@ export const Modal = ({
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div
-        className="absolute inset-0 bg-theme-overlay"
+        className="absolute inset-0 bg-black/45 backdrop-blur-[1px]"
         aria-hidden="true"
         onClick={closeOnOverlayClick ? onClose : undefined}
       />
@@ -143,7 +143,7 @@ export const Modal = ({
         aria-labelledby={labelledBy}
         aria-describedby={describedBy}
         tabIndex={-1}
-        className={`relative z-10 flex flex-col ${MODAL_SIZE[size]} rounded-2xl bg-surface p-6 text-theme-primary shadow-xl outline-none`}
+        className={`relative z-10 flex flex-col ${MODAL_SIZE[size]} rounded-2xl border border-[#cbd5e1] bg-white p-6 text-[#111827] shadow-2xl outline-none`}
       >
         {children}
       </div>
@@ -185,7 +185,7 @@ type ConfirmVariant = "primary" | "danger";
 
 // 확인 버튼 색상 (시안 기준값 — 추후 디자인 토큰으로 교체 예정)
 const CONFIRM_STYLE: Record<ConfirmVariant, string> = {
-  primary: "bg-brand text-brand-contrast hover:bg-brand-hover",
+  primary: "bg-[#17345d] text-white hover:bg-[#102947]",
   danger: "bg-red-600 text-white hover:bg-red-700",
 };
 
@@ -247,7 +247,7 @@ export const ConfirmModal = ({
           {/* 제목·설명 모두 가운데 정렬 */}
           <h2
             id={titleId}
-            className="w-full text-center text-lg font-bold text-theme-primary"
+            className="w-full text-center text-lg font-bold text-[#111827]"
           >
             {title}
           </h2>
@@ -255,7 +255,7 @@ export const ConfirmModal = ({
           {description ? (
             <p
               id={descriptionId}
-              className="mt-3 w-full text-center text-sm leading-relaxed text-theme-secondary"
+              className="mt-3 w-full text-center text-sm leading-relaxed text-[#64748b]"
             >
               {description}
             </p>
@@ -267,7 +267,7 @@ export const ConfirmModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-lg border border-theme bg-surface px-4 py-3 text-sm font-semibold text-theme-secondary hover:bg-surface-subtle"
+              className="flex-1 rounded-lg border border-[#e2e8f0] bg-white px-4 py-3 text-sm font-semibold text-[#64748b] transition hover:bg-[#f8fafc]"
             >
               {cancelText}
             </button>
