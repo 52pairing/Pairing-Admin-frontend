@@ -45,32 +45,32 @@ const ChevronDown = (props: IconProps) => <Icon {...props}><path d="m6 9 6 6 6-6
 const menuItems = [
   {
     label: "회원관리",
-    href: "/admin/members",
+    href: "/users",
     icon: Users,
   },
   {
     label: "프로젝트 정산관리",
-    href: "/admin/projects",
+    href: "/projects",
     icon: FileText,
   },
   {
     label: "거래/정산관리",
-    href: "/admin/settlements",
+    href: "/settlements",
     icon: RefreshCw,
   },
   {
     label: "리뷰 관리",
-    href: "/admin/reviews",
+    href: "/reviews",
     icon: Star,
   },
   {
     label: "AI Agent관리",
-    href: "/admin/ai-agent",
+    href: "/ai-agent",
     icon: Bot,
   },
   {
     label: "1대1문의 관리",
-    href: "/admin/inquiries",
+    href: "/inquiries",
     icon: MessageSquare,
   },
 ];
@@ -79,14 +79,15 @@ export default function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-[280px] shrink-0 flex-col bg-[#09192f] px-6 py-8 text-white">
+    <aside className="sticky top-0 flex h-screen w-[72px] shrink-0 flex-col bg-[#09192f] px-2 py-5 text-white lg:w-[88px] lg:px-4 xl:w-[280px] xl:px-6 xl:py-8">
       {/* 상단 로고 */}
-      <div className="mb-12 flex items-center gap-3 px-2">
-        <h1 className="text-[28px] font-bold tracking-[-0.03em]">
-          관리자
+      <div className="mb-8 flex items-center justify-center gap-3 px-2 xl:mb-12 xl:justify-start">
+        <h1 className="font-bold tracking-[-0.03em]">
+          <span className="text-[20px] xl:hidden">관</span>
+          <span className="hidden text-[28px] xl:inline">관리자</span>
         </h1>
 
-        <span className="rounded-md bg-[#4f6ff5] px-2.5 py-1 text-[13px] font-semibold text-white">
+        <span className="hidden rounded-md bg-[#4f6ff5] px-2.5 py-1 text-[13px] font-semibold text-white xl:inline">
           v1.0
         </span>
       </div>
@@ -105,7 +106,7 @@ export default function AdminSidebar() {
               key={item.href}
               href={item.href}
               className={`
-                group flex h-[56px] items-center gap-4 rounded-xl px-4
+                group flex h-[52px] items-center justify-center gap-4 rounded-xl px-3 xl:h-[56px] xl:justify-start xl:px-4
                 text-[15px] font-medium transition-all duration-200
                 ${
                   isActive
@@ -124,7 +125,7 @@ export default function AdminSidebar() {
                 }
               />
 
-              <span>{item.label}</span>
+              <span className="sr-only xl:not-sr-only">{item.label}</span>
             </Link>
           );
         })}
@@ -134,7 +135,7 @@ export default function AdminSidebar() {
       <div className="flex-1" />
 
       {/* 관리자 정보 */}
-      <div className="border-t border-[#233750] pt-6">
+      <div className="hidden border-t border-[#233750] pt-6 xl:block">
         <button
           type="button"
           className="mb-5 flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition hover:bg-[#102947]"
