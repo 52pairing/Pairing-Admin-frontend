@@ -19,6 +19,15 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+const AUTH_BYPASS_ENABLED =
+  process.env.NODE_ENV === "development" &&
+  process.env.NEXT_PUBLIC_AUTH_BYPASS === "true";
+
+const PREVIEW_ADMIN: AdminUser = {
+  adminId: 0,
+  username: "디자인 미리보기",
+  lastLoginAt: "",
+};
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -27,11 +36,15 @@ interface AuthProviderProps {
 export default function AuthProvider({ children }: AuthProviderProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [admin, setAdmin] = useState<AdminUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [admin, setAdmin] = useState<AdminUser | null>(
+    AUTH_BYPASS_ENABLED ? PREVIEW_ADMIN : null,
+  );
+  const [isLoading, setIsLoading] = useState(!AUTH_BYPASS_ENABLED);
   const isAuthPage = pathname.startsWith("/auth/");
 
   useEffect(() => {
+    if (AUTH_BYPASS_ENABLED) return;
+
     let isActive = true;
 
     fetchMe()

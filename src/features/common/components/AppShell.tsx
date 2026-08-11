@@ -18,9 +18,11 @@ export default function AppShell({ children }: AppShellProps) {
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       <AdminSidebar />
-      <main className="min-w-0 flex-1">{children}</main>
+      <main className="scrollbar-hidden min-w-0 flex-1 overflow-y-auto">
+        {children}
+      </main>
     </div>
   );
 }
