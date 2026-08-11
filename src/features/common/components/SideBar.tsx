@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, type ReactNode } from "react";
+
+import { useAuth } from "@/features/auth/AuthProvider";
 
 type IconProps = {
   size?: number;
@@ -77,6 +79,20 @@ const menuItems = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { admin, logout } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+
+    try {
+      await logout();
+    } finally {
+      router.replace("/auth/login");
+    }
+  };
 
   return (
     <aside className="sticky top-0 flex h-screen w-[72px] shrink-0 flex-col bg-[#09192f] px-2 py-5 text-white lg:w-[88px] lg:px-4 xl:w-[280px] xl:px-6 xl:py-8">
@@ -146,7 +162,7 @@ export default function AdminSidebar() {
 
           <div className="flex flex-1 items-center justify-between">
             <span className="text-[15px] font-semibold text-white">
-              관리자
+              {admin?.username ?? "관리자"}
             </span>
 
             <ChevronDown
@@ -158,19 +174,21 @@ export default function AdminSidebar() {
         </button>
 
         {/* 로그아웃 */}
-        <Link
-          href="/auth/login"
+        <button
+          type="button"
+          onClick={handleLogout}
+          disabled={isLoggingOut}
           className="
             flex h-[50px] w-full items-center justify-center gap-2
             rounded-xl border border-[#40516a]
             bg-[#1d304a] text-[14px] font-semibold text-white
             transition
-            hover:bg-[#29415f]
+            hover:bg-[#29415f] disabled:cursor-not-allowed disabled:opacity-60
           "
         >
           <LogOut size={19} strokeWidth={1.8} />
-          로그아웃
-        </Link>
+          {isLoggingOut ? "로그아웃 중..." : "로그아웃"}
+        </button>
       </div>
     </aside>
   );
