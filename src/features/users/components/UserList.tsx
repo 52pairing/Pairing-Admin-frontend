@@ -1,36 +1,12 @@
 import Link from "next/link";
 
-import type {
-  User,
-  UserStatus,
-  UserType,
-} from "../users";
+import type { User } from "../users";
+import UserStatusBadge from "./UserStatusBadge";
+import UserTypeBadge from "./UserTypeBadge";
 
 interface UserListProps {
   user: User;
 }
-
-const typeLabel: Record<UserType, string> = {
-  CLIENT: "클라이언트",
-  FREELANCER: "프리랜서",
-};
-
-const statusLabel: Record<UserStatus, string> = {
-  ACTIVE: "정상",
-  SUSPENDED: "정지",
-  WITHDRAWN: "탈퇴",
-};
-
-const typeStyle: Record<UserType, string> = {
-  CLIENT: "bg-[#eaf1f8] text-[#17324d]",
-  FREELANCER: "bg-[#eee9ff] text-[#7048e8]",
-};
-
-const statusStyle: Record<UserStatus, string> = {
-  ACTIVE: "bg-[#dcfce7] text-[#16a34a]",
-  SUSPENDED: "bg-[#fee2e2] text-[#ef4444]",
-  WITHDRAWN: "bg-[#f1f5f9] text-[#94a3b8]",
-};
 
 export default function UserList({
   user,
@@ -45,13 +21,7 @@ export default function UserList({
 
       {/* 유형 */}
       <div>
-        <span
-          className={`rounded-md px-2 py-1 text-[11px] font-bold ${
-            typeStyle[user.type]
-          }`}
-        >
-          {typeLabel[user.type]}
-        </span>
+        <UserTypeBadge type={user.type} />
       </div>
 
       {/* 이름 / 기업명 */}
@@ -101,13 +71,7 @@ export default function UserList({
 
       {/* 상태 */}
       <div>
-        <span
-          className={`rounded-md px-2 py-1 text-[11px] font-bold ${
-            statusStyle[user.status]
-          }`}
-        >
-          {statusLabel[user.status]}
-        </span>
+        <UserStatusBadge status={user.status} />
       </div>
 
       {/* 프로젝트 */}
@@ -117,7 +81,7 @@ export default function UserList({
 
       {/* 상세 */}
       <Link
-        href={`/admin/members/${user.id}`}
+        href={`/users/${user.id}`}
         className="flex h-8 w-11 items-center justify-center rounded-md bg-[#edf3f8] text-[12px] font-bold text-[#17324d] transition hover:bg-[#dce7f1]"
       >
         상세
