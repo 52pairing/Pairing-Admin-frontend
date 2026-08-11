@@ -158,8 +158,8 @@ export default function AdminSidebar() {
         </button>
 
         {/* 로그아웃 */}
-        <button
-          type="button"
+        <Link
+          href="/auth/login"
           className="
             flex h-[50px] w-full items-center justify-center gap-2
             rounded-xl border border-[#40516a]
@@ -170,7 +170,7 @@ export default function AdminSidebar() {
         >
           <LogOut size={19} strokeWidth={1.8} />
           로그아웃
-        </button>
+        </Link>
       </div>
     </aside>
   );

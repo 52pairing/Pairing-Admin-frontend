@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import AdminSidebar from "@/features/common/components/SideBar";
+import AppShell from "@/features/common/components/AppShell";
 
 import "./globals.css";
 
@@ -12,9 +12,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ko">
-      <body className="flex min-h-screen">
-        <AdminSidebar />
-        <main className="min-w-0 flex-1">{children}</main>
+      <body>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );
