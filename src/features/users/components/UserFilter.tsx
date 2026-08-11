@@ -8,7 +8,7 @@ export default function UserFilter() {
         type="text"
         placeholder="이름, 이메일 검색..."
         aria-label="회원 검색어"
-        className="col-span-2 h-10 min-w-0 rounded-lg border border-[#e2e8f0] bg-white px-4 text-[13px] outline-none transition focus:border-[#4f6ff5] sm:w-[220px]"
+        className="col-span-2 h-10 min-w-0 rounded-lg border border-[#e2e8f0] bg-white px-4 text-[13px] outline-none transition focus:border-[#4f6ff5] sm:flex-1"
       />
 
       {/* 회원 유형 */}
@@ -36,7 +36,7 @@ export default function UserFilter() {
 
       <button
         type="button"
-        className="h-10 rounded-lg bg-[#4f6ff5] px-5 text-[13px] font-bold text-white transition hover:bg-[#405fe5]"
+        className="h-10 rounded-lg bg-[#102947] px-5 text-[13px] font-bold text-white transition hover:bg-[#17345d]"
       >
         검색
       </button>

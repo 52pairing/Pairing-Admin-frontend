@@ -26,7 +26,7 @@ export default function ProjectFilter({
         }}
         placeholder="프로젝트명, 클라이언트 검색..."
         aria-label="프로젝트 검색어"
-        className="col-span-2 h-10 min-w-0 rounded-lg border border-[#e2e8f0] bg-white px-4 text-[13px] outline-none transition placeholder:text-[#94a3b8] focus:border-[#4f6ff5] sm:w-[250px]"
+        className="col-span-2 h-10 min-w-0 rounded-lg border border-[#e2e8f0] bg-white px-4 text-[13px] outline-none transition placeholder:text-[#94a3b8] focus:border-[#4f6ff5] sm:flex-1"
       />
 
       <select
@@ -44,7 +44,7 @@ export default function ProjectFilter({
       <button
         type="button"
         onClick={onSearch}
-        className="h-10 rounded-lg bg-[#3b6df6] px-5 text-[13px] font-bold text-white transition hover:bg-[#315fd8]"
+          className="h-10 rounded-lg bg-[#102947] px-5 text-[13px] font-bold text-white transition hover:bg-[#17345d]"
       >
         검색
       </button>
