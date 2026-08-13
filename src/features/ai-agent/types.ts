@@ -1,14 +1,13 @@
 export type NegotiationStatus = "IN_PROGRESS" | "AGREED" | "FAILED";
 export type NegotiationStatusFilter = NegotiationStatus | "ALL";
-
-export interface NegotiationSession {
-  id: string;
-  projectName: string;
-  clientName: string;
-  freelancerName: string;
-  status: NegotiationStatus;
-  negotiationCount: number;
-  startedAt: string;
-  endedAt: string | null;
-}
-
+export interface NegotiationSummary { total: number; inProgress: number; agreed: number; failed: number; averageRound: number; averageDurationDays: number }
+export interface NegotiationListItem { negotiationId: number; negotiationNo?: string; projectId: number; projectTitle: string; clientName: string; freelancerName: string; status: NegotiationStatus; statusLabel: string; totalRound: number; startedAt: string | null; endedAt: string | null }
+export interface NegotiationListResponse { content: NegotiationListItem[]; page: number; size: number; totalElements: number; totalPages: number; first: boolean; last: boolean }
+export interface NegotiationListParams { status?: NegotiationStatus; keyword?: string; page?: number; size?: number }
+export interface NegotiationMessage { sentAt: string | null; senderType: string; senderLabel: string; byAgent: boolean; conditionType: string | null; conditionLabel: string | null; messageType: string; messageTypeLabel: string; proposedValue: string | null; proposedValueLabel: string | null; content: string; reason: string | null; response: string | null; responseLabel: string | null }
+export interface NegotiationRound { roundNo: number; messageCount: number; startedAt: string | null; messages: NegotiationMessage[] }
+export interface NegotiationDetail { negotiationId: number; projectTitle: string; clientName: string; freelancerName: string; status: NegotiationStatus; statusLabel: string; startedAt: string | null; endedAt: string | null; totalRound: number; finalResult: { amountLabel: string | null; periodLabel: string | null; startDateLabel: string | null; workStyleLabel: string | null; workFormLabel: string | null }; rounds: NegotiationRound[] }
+export interface TokenUsageSummary { totalCalls: number; successCalls: number; failedCalls: number; promptTokens: number; outputTokens: number; totalTokens: number; retryCount: number; averageLatencyMs: number; maxLatencyMs: number | null; models: string }
+export interface TokenRoundUsage { roundNo: number; calls: number; promptTokens: number; outputTokens: number; totalTokens: number }
+export interface TokenCall { logId: number; roundNo: number | null; agentType: string; agentTypeLabel: string; model: string; status: string; statusLabel: string; promptTokens: number | null; outputTokens: number | null; totalTokens: number | null; latencyMs: number | null; retryCount: number; errorMessage: string | null; calledAt: string | null }
+export interface NegotiationTokenUsage { negotiationId: number; usage: TokenUsageSummary; byRound: TokenRoundUsage[]; calls: TokenCall[] }

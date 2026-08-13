@@ -4,7 +4,7 @@ const memberStyle = { CLIENT: "bg-[#eaf1f8] text-[#17324d]", FREELANCER: "bg-[#e
 const memberLabel = { CLIENT: "클라이언트", FREELANCER: "프리랜서" };
 
 export default function ReviewRow({ review, onToggleVisibility, onTogglePromotion, disabled }: { review: SiteReview; onToggleVisibility: (review: SiteReview) => void; onTogglePromotion: (review: SiteReview) => void; disabled: boolean }) {
-  return <div className="grid min-h-[98px] grid-cols-[85px_110px_110px_120px_2.5fr_1.4fr_110px_105px_90px_145px] items-center border-b border-[#e5e7eb] px-3 text-[12px]">
+  return <div className="review-list-row grid min-h-[98px] grid-cols-[85px_110px_110px_120px_2.5fr_1.4fr_110px_105px_90px_145px] items-center border-b border-[#e5e7eb] px-3 text-[12px]">
     <span className="font-semibold text-[#64748b]">{review.siteReviewNo}</span>
     <div><span className={`rounded-md px-2 py-1 text-[10px] font-bold ${memberStyle[review.writerRole]}`}>{memberLabel[review.writerRole]}</span></div>
     <span className="truncate pr-3 font-semibold text-[#64748b]">{review.writerName}</span>
