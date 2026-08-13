@@ -1,41 +1,15 @@
-import type { PromotionStatusFilter, ReviewMemberFilter, VisibilityStatusFilter } from "../types";
+import type { ReviewMemberType, SiteReviewListParams, VisibilityStatus } from "../types";
 
-interface ReviewFilterProps {
-  keyword: string;
-  memberType: ReviewMemberFilter;
-  promotionStatus: PromotionStatusFilter;
-  visibilityStatus: VisibilityStatusFilter;
-  onKeywordChange: (value: string) => void;
-  onMemberTypeChange: (value: ReviewMemberFilter) => void;
-  onPromotionStatusChange: (value: PromotionStatusFilter) => void;
-  onVisibilityStatusChange: (value: VisibilityStatusFilter) => void;
-  onSearch: () => void;
-  onReset: () => void;
+export type ReviewFilterValue = Pick<SiteReviewListParams, "keyword" | "score" | "writerRole" | "visibility" | "promoted">;
+
+export default function ReviewFilter({ value, onChange, onSearch, onReset, disabled }: { value: ReviewFilterValue; onChange: (value: ReviewFilterValue) => void; onSearch: () => void; onReset: () => void; disabled: boolean }) {
+  const update = (patch: Partial<ReviewFilterValue>) => onChange({ ...value, ...patch });
+  return <form onSubmit={(event) => { event.preventDefault(); onSearch(); }} className="flex flex-wrap gap-2 p-4 sm:px-5 sm:py-5">
+    <input type="search" value={value.keyword ?? ""} onChange={(e) => update({ keyword: e.target.value })} placeholder="회원명, 내용, 프로젝트 검색..." aria-label="리뷰 검색어" className="h-10 min-w-[240px] flex-1 rounded-lg border border-[#e2e8f0] px-4 text-[13px]" />
+    <select value={value.score ?? ""} onChange={(e) => update({ score: e.target.value ? Number(e.target.value) : undefined })} aria-label="별점" className="h-10 rounded-lg border border-[#e2e8f0] px-3 text-[13px]"><option value="">별점 전체</option>{[5,4,3,2,1].map((score) => <option key={score} value={score}>{score}점</option>)}</select>
+    <select value={value.writerRole ?? ""} onChange={(e) => update({ writerRole: (e.target.value || undefined) as ReviewMemberType | undefined })} aria-label="회원 유형" className="h-10 rounded-lg border border-[#e2e8f0] px-3 text-[13px]"><option value="">회원 전체</option><option value="CLIENT">클라이언트</option><option value="FREELANCER">프리랜서</option></select>
+    <select value={value.promoted === undefined ? "" : String(value.promoted)} onChange={(e) => update({ promoted: e.target.value === "" ? undefined : e.target.value === "true" })} aria-label="홍보 상태" className="h-10 rounded-lg border border-[#e2e8f0] px-3 text-[13px]"><option value="">홍보 전체</option><option value="true">홍보 활용</option><option value="false">홍보 제외</option></select>
+    <select value={value.visibility ?? ""} onChange={(e) => update({ visibility: (e.target.value || undefined) as VisibilityStatus | undefined })} aria-label="공개 여부" className="h-10 rounded-lg border border-[#e2e8f0] px-3 text-[13px]"><option value="">공개 전체</option><option value="PUBLIC">공개</option><option value="PRIVATE">비공개</option></select>
+    <button disabled={disabled} className="h-10 rounded-lg bg-[#102947] px-5 text-[13px] font-bold text-white disabled:opacity-50">검색</button><button type="button" onClick={onReset} disabled={disabled} className="h-10 rounded-lg border border-[#e2e8f0] px-4 text-[13px]">초기화</button>
+  </form>;
 }
-
-export default function ReviewFilter(props: ReviewFilterProps) {
-  return (
-    <div className="grid grid-cols-2 gap-2 p-4 sm:flex sm:flex-wrap sm:items-center sm:px-5 sm:py-5">
-      <input
-        type="search"
-        value={props.keyword}
-        onChange={(event) => props.onKeywordChange(event.target.value)}
-        onKeyDown={(event) => event.key === "Enter" && props.onSearch()}
-        placeholder="회원명, 내용, 프로젝트 검색..."
-        aria-label="리뷰 검색어"
-        className="col-span-2 h-10 min-w-0 rounded-lg border border-[#e2e8f0] bg-white px-4 text-[13px] outline-none transition placeholder:text-[#94a3b8] focus:border-[#4f6ff5] sm:flex-1"
-      />
-      <select value={props.memberType} onChange={(event) => props.onMemberTypeChange(event.target.value as ReviewMemberFilter)} aria-label="회원 유형" className="h-10 min-w-0 rounded-lg border border-[#e2e8f0] bg-white px-3 text-[13px] outline-none sm:w-[130px]">
-        <option value="ALL">회원 유형 전체</option><option value="CLIENT">클라이언트</option><option value="FREELANCER">프리랜서</option>
-      </select>
-      <select value={props.promotionStatus} onChange={(event) => props.onPromotionStatusChange(event.target.value as PromotionStatusFilter)} aria-label="홍보 상태" className="h-10 min-w-0 rounded-lg border border-[#e2e8f0] bg-white px-3 text-[13px] outline-none sm:w-[130px]">
-        <option value="ALL">홍보 상태 전체</option><option value="PROMOTED">홍보 활용</option><option value="EXCLUDED">홍보 제외</option>
-      </select>
-      <select value={props.visibilityStatus} onChange={(event) => props.onVisibilityStatusChange(event.target.value as VisibilityStatusFilter)} aria-label="공개 여부" className="h-10 min-w-0 rounded-lg border border-[#e2e8f0] bg-white px-3 text-[13px] outline-none sm:w-[125px]">
-        <option value="ALL">공개 여부 전체</option><option value="PUBLIC">공개</option><option value="PRIVATE">비공개</option>
-      </select>
-      <button type="button" onClick={props.onSearch}   className="h-10 rounded-lg bg-[#102947] px-5 text-[13px] font-bold text-white transition hover:bg-[#17345d]">검색</button>
-    </div>
-  );
-}
-
