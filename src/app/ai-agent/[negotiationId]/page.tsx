@@ -50,7 +50,7 @@ export default function AiAgentDetailPage() {
   const tabs: Array<{ value: DetailTab; label: string; action: () => void }> = [
     { value: "LOG", label: "협상 로그", action: () => setTab("LOG") },
     { value: "TOKEN", label: "토큰 사용량", action: () => void openToken() },
-    { value: "MATCHING", label: "매칭 로그", action: () => setTab("MATCHING") },
+    { value: "MATCHING", label: "매칭", action: () => setTab("MATCHING") },
   ];
 
   return <div className="min-h-screen bg-[#f7f8fa] p-4 sm:p-6 xl:p-8">
@@ -61,7 +61,7 @@ export default function AiAgentDetailPage() {
       <div className="scrollbar-hidden overflow-x-auto border-b"><div className="flex min-w-max">{tabs.map((item) => <button key={item.value} type="button" onClick={item.action} className={`relative px-5 py-4 text-[13px] font-semibold ${tab === item.value ? "text-blue-600" : "text-slate-500"}`}>{item.label}{tab === item.value && <span className="absolute inset-x-0 bottom-0 h-0.5 bg-blue-600" />}</button>)}</div></div>
       {tab === "LOG" && <NegotiationLogs data={data} />}
       {tab === "TOKEN" && (loadingToken ? <LoadingState message="토큰 사용량을 불러오는 중입니다." /> : token ? <TokenView data={token} /> : <ErrorState title="토큰 사용량을 불러오지 못했습니다" description={error} />)}
-      {tab === "MATCHING" && <MatchingLogTab projectId={data.negotiationId} />}
+      {tab === "MATCHING" && <MatchingLogTab projectId={data.projectId} />}
     </div>
   </div>;
 }
