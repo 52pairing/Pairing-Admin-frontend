@@ -4,7 +4,7 @@ import type {
   ApiSuccessResponse,
 } from "./types";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8081";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ?? "";
 const AUTH_BASE_PATH = "/api/v1/admin/auth";
 
 export class AdminApiError extends Error {
@@ -80,7 +80,7 @@ async function issueCsrfToken() {
   }>(response);
 }
 
-async function request<T>(
+export async function adminRequest<T>(
   path: string,
   init: RequestInit = {},
   csrfRetried = false,
@@ -122,7 +122,7 @@ async function request<T>(
       !csrfRetried
     ) {
       await issueCsrfToken();
-      return request<T>(path, init, true);
+      return adminRequest<T>(path, init, true);
     }
 
     throw error;
@@ -134,19 +134,19 @@ export function fetchCsrfToken() {
 }
 
 export function login(username: string, password: string) {
-  return request<AdminUser>(`${AUTH_BASE_PATH}/login`, {
+  return adminRequest<AdminUser>(`${AUTH_BASE_PATH}/login`, {
     method: "POST",
     body: JSON.stringify({ username, password }),
   });
 }
 
 export function fetchMe() {
-  return request<AdminUser>(`${AUTH_BASE_PATH}/me`);
+  return adminRequest<AdminUser>(`${AUTH_BASE_PATH}/me`);
 }
 
 export async function logout() {
   try {
-    await request<null>(`${AUTH_BASE_PATH}/logout`, { method: "POST" });
+    await adminRequest<null>(`${AUTH_BASE_PATH}/logout`, { method: "POST" });
   } catch (error) {
     if (error instanceof AdminApiError && error.status === 401) return;
     throw error;

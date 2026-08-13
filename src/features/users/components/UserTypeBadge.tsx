@@ -1,4 +1,4 @@
-import type { UserType } from "../users";
+import type { UserType } from "../types";
 
 interface UserTypeBadgeProps {
   type: UserType;
