@@ -6,10 +6,9 @@ interface AgentFilterProps {
   onKeywordChange: (value: string) => void;
   onStatusChange: (value: NegotiationStatusFilter) => void;
   onSearch: () => void;
-  onReset: () => void;
 }
 
-export default function AgentFilter({ keyword, status, onKeywordChange, onStatusChange, onSearch, onReset }: AgentFilterProps) {
+export default function AgentFilter({ keyword, status, onKeywordChange, onStatusChange, onSearch }: AgentFilterProps) {
   return (
     <div className="grid grid-cols-2 gap-2 p-4 sm:flex sm:items-center sm:px-5 sm:py-5">
       <input
@@ -33,7 +32,6 @@ export default function AgentFilter({ keyword, status, onKeywordChange, onStatus
         <option value="FAILED">결렬</option>
       </select>
       <button type="button" onClick={onSearch} className="h-10 rounded-lg bg-[#102947] px-5 text-[13px] font-bold text-white transition hover:bg-[#17345d]">검색</button>
-      <button type="button" onClick={onReset} className="h-10 rounded-lg border border-[#e2e8f0] bg-white px-4 text-[13px] font-semibold text-[#64748b] transition hover:bg-[#f8fafc]">초기화</button>
     </div>
   );
 }
