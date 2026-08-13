@@ -2,6 +2,7 @@ import type { ProjectStatus } from "../types";
 
 interface ProjectStatusBadgeProps {
   status: ProjectStatus;
+  label?: string;
 }
 
 const statusLabel: Record<ProjectStatus, string> = {
@@ -11,7 +12,7 @@ const statusLabel: Record<ProjectStatus, string> = {
   CONTRACT_PENDING: "계약 대기",
   IN_PROGRESS: "진행중",
   COMPLETION_PENDING: "완료 대기",
-  COMPLETED: "종료",
+  CLOSED: "종료",
   CANCELED: "취소됨",
 };
 
@@ -22,16 +23,17 @@ const statusStyle: Record<ProjectStatus, string> = {
   CONTRACT_PENDING: "bg-[#e5efff] text-[#2563eb]",
   IN_PROGRESS: "bg-[#dbeafe] text-[#2563eb]",
   COMPLETION_PENDING: "bg-[#fff7ed] text-[#ea580c]",
-  COMPLETED: "bg-[#dcfce7] text-[#16a34a]",
+  CLOSED: "bg-[#dcfce7] text-[#16a34a]",
   CANCELED: "bg-[#fee2e2] text-[#ef4444]",
 };
 
 export default function ProjectStatusBadge({
   status,
+  label,
 }: ProjectStatusBadgeProps) {
   return (
     <span className={`inline-flex rounded-md px-2 py-1 text-[11px] font-bold ${statusStyle[status]}`}>
-      {statusLabel[status]}
+      {label ?? statusLabel[status]}
     </span>
   );
 }

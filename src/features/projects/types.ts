@@ -1,21 +1,8 @@
-export type ProjectStatus =
-  | "REGISTERED"
-  | "RECRUITING"
-  | "NEGOTIATING"
-  | "CONTRACT_PENDING"
-  | "IN_PROGRESS"
-  | "COMPLETION_PENDING"
-  | "COMPLETED"
-  | "CANCELED";
-
-export interface Project {
-  id: string;
-  name: string;
-  category: string;
-  client: string;
-  status: ProjectStatus;
-  contractAmount: number;
-  registeredAt: string;
-}
-
-export type ProjectStatusFilter = "ALL" | ProjectStatus;
+export type ProjectStatus = "REGISTERED" | "RECRUITING" | "NEGOTIATING" | "CONTRACT_PENDING" | "IN_PROGRESS" | "COMPLETION_PENDING" | "CLOSED" | "CANCELED";
+export interface ProjectStatusCounts { total: number; items: Array<{ status: ProjectStatus; label: string; count: number }> }
+export interface ProjectListItem { projectId: number; projectNo: string; title: string; clientAccountId: number; clientName: string; status: ProjectStatus | null; statusCode: string; statusLabel: string; paymentStatus: string | null; paymentStatusLabel: string; jobCategory: string | null; jobCategoryLabel: string | null; jobRole: string | null; jobRoleLabel: string | null; positionCount: number; contractSalaryAmount: number | null; budgetAmount: number; periodValue: number; periodUnit: string; periodUnitLabel: string; totalHeadcount: number; confirmedHeadcount: number; createdAt: string | null }
+export interface ProjectListResponse { content: ProjectListItem[]; page: number; size: number; totalElements: number; totalPages: number; first: boolean; last: boolean }
+export interface ProjectListParams { status?: ProjectStatus; keyword?: string; fromDate?: string; toDate?: string; page?: number; size?: number }
+export interface ProjectPosition { positionId: number; positionNo: number; jobCategory: string; jobCategoryLabel: string; jobRole: string; jobRoleLabel: string; minCareerYears: number; headcount: number; confirmedCount: number; status: string; statusLabel: string; preferredNote: string | null; skillCodes: string[] }
+export interface ProjectContract { contractId: number; contractNo: string; positionId: number; freelancerAccountId: number; freelancerName: string; freelancerEmail: string; salaryAmount: number; totalAmount: number; startDate: string; endDate: string; status: string | null; statusCode: string; statusLabel: string; workStyleLabel: string; workFormLabel: string; signedAt: string | null; completedAt: string | null; terminatedAt: string | null; terminatedBy: string | null; createdAt: string }
+export interface ProjectDetail { projectId: number; projectNo: string; title: string; clientAccountId: number; clientName: string; clientManagerName: string; clientEmail: string; clientPhone: string; status: ProjectStatus | null; statusCode: string; statusLabel: string; paymentStatus: string | null; paymentStatusLabel: string; budgetAmount: number; periodValue: number; periodUnit: string; periodUnitLabel: string; workStyle: string; workStyleLabel: string; workForm: string; workFormLabel: string; workLocation: string | null; contractType: string; startDesiredDate: string | null; startNegotiable: boolean; totalHeadcount: number; confirmedHeadcount: number; currentSituation: string | null; mainTask: string | null; detailScope: string | null; extraNote: string | null; recruitStartedAt: string | null; recruitDeadline: string | null; extensionCount: number; noticeAgreedAt: string | null; canceledAt: string | null; closedAt: string | null; createdAt: string | null; positions: ProjectPosition[]; contracts: ProjectContract[] }

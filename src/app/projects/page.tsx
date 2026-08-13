@@ -1,118 +1,19 @@
 "use client";
-
-import { useMemo, useState } from "react";
-
+import { useEffect, useState } from "react";
 import AdminPageHeader from "@/features/common/components/Header";
-import ProjectFilter from "@/features/projects/components/ProjectFilter";
+import { ErrorState } from "@/features/common/components/ErrorState";
+import { LoadingState } from "@/features/common/components/Loading";
+import { fetchProjects, fetchProjectStatusCounts } from "@/features/projects/api";
+import ProjectFilter, { type ProjectFilterValue } from "@/features/projects/components/ProjectFilter";
 import ProjectRow from "@/features/projects/components/ProjectRow";
-import ProjectStatusTabs, {
-  projectStatuses,
-} from "@/features/projects/components/ProjectStatusTabs";
-import { projects } from "@/features/projects/projects";
-import type {
-  ProjectStatusFilter,
-} from "@/features/projects/types";
-
+import ProjectStatusTabs from "@/features/projects/components/ProjectStatusTabs";
+import type { ProjectListResponse, ProjectStatus, ProjectStatusCounts } from "@/features/projects/types";
+const EMPTY: ProjectFilterValue = { keyword: "", fromDate: "", toDate: "" };
 export default function AdminProjectsPage() {
-  const [status, setStatus] = useState<ProjectStatusFilter>("ALL");
-  const [keywordInput, setKeywordInput] = useState("");
-  const [clientInput, setClientInput] = useState("");
-  const [keyword, setKeyword] = useState("");
-  const [client, setClient] = useState("");
-
-  const statusCounts = useMemo(() => {
-    const counts = Object.fromEntries(
-      ["ALL", ...projectStatuses].map((projectStatus) => [projectStatus, 0]),
-    ) as Record<ProjectStatusFilter, number>;
-
-    counts.ALL = projects.length;
-    projects.forEach((project) => {
-      counts[project.status] += 1;
-    });
-
-    return counts;
-  }, []);
-
-  const filteredProjects = useMemo(() => {
-    const normalizedKeyword = keyword.trim().toLocaleLowerCase("ko-KR");
-
-    return projects.filter((project) => {
-      const matchesStatus = status === "ALL" || project.status === status;
-      const matchesKeyword =
-        normalizedKeyword === "" ||
-        project.name.toLocaleLowerCase("ko-KR").includes(normalizedKeyword) ||
-        project.client.toLocaleLowerCase("ko-KR").includes(normalizedKeyword);
-      const matchesClient = client === "" || project.client === client;
-
-      return matchesStatus && matchesKeyword && matchesClient;
-    });
-  }, [client, keyword, status]);
-
-  const handleSearch = () => {
-    setKeyword(keywordInput);
-    setClient(clientInput);
-  };
-
-  const handleReset = () => {
-    setStatus("ALL");
-    setKeywordInput("");
-    setClientInput("");
-    setKeyword("");
-    setClient("");
-  };
-
-  return (
-    <div className="min-h-screen bg-[#f7f8fa] p-4 sm:p-6 xl:p-8">
-      <AdminPageHeader
-        title="프로젝트 관리"
-        description="플랫폼에 등록된 모든 프로젝트를 관리합니다."
-        date="2026년 8월 11일"
-      />
-
-      <ProjectStatusTabs
-        value={status}
-        counts={statusCounts}
-        onChange={setStatus}
-      />
-
-      <section className="mt-6 overflow-hidden rounded-xl border border-[#e2e8f0] bg-white">
-        <ProjectFilter
-          keyword={keywordInput}
-          client={clientInput}
-          onKeywordChange={setKeywordInput}
-          onClientChange={setClientInput}
-          onSearch={handleSearch}
-          onReset={handleReset}
-        />
-
-        <div className="overflow-x-auto">
-          <div className="min-w-[980px]">
-            <div className="grid h-11 grid-cols-[110px_2fr_1.2fr_110px_160px_120px_70px] items-center bg-[#f8fafc] px-3 text-[12px] font-semibold text-[#94a3b8]">
-              <span>번호</span>
-              <span>프로젝트명</span>
-              <span>클라이언트</span>
-              <span>상태</span>
-              <span>계약 금액</span>
-              <span>등록일</span>
-              <span>상세</span>
-            </div>
-
-            {filteredProjects.length > 0 ? (
-              filteredProjects.map((project) => (
-                <ProjectRow key={project.id} project={project} />
-              ))
-            ) : (
-              <div className="flex h-40 items-center justify-center text-[14px] font-medium text-[#94a3b8]">
-                조건에 맞는 프로젝트가 없습니다.
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="border-t border-[#e5e7eb] px-5 py-4 text-[13px] font-semibold text-[#94a3b8]">
-          {filteredProjects.length}개의 프로젝트
-        </div>
-      </section>
-    </div>
-  );
+  const [counts, setCounts] = useState<ProjectStatusCounts | null>(null); const [list, setList] = useState<ProjectListResponse | null>(null); const [status, setStatus] = useState<ProjectStatus>(); const [input, setInput] = useState(EMPTY); const [filters, setFilters] = useState(EMPTY); const [page, setPage] = useState(0); const [loading, setLoading] = useState(true); const [error, setError] = useState<string>(); const [dateError, setDateError] = useState<string>();
+  useEffect(() => { let active = true; fetchProjectStatusCounts().then((v) => { if (active) setCounts(v); }).catch(() => { if (active) setError("프로젝트 상태 집계를 불러오지 못했습니다."); }); return () => { active = false; }; }, []);
+  useEffect(() => { let active = true; fetchProjects({ status, keyword: filters.keyword.trim(), fromDate: filters.fromDate, toDate: filters.toDate, page, size: 20 }).then((v) => { if (active) { setList(v); setError(undefined); } }).catch((e: unknown) => { if (active) setError(e instanceof Error ? e.message : "프로젝트 목록을 불러오지 못했습니다."); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, [filters, page, status]);
+  const search = () => { if (input.fromDate && input.toDate && input.fromDate > input.toDate) { setDateError("시작일은 종료일보다 늦을 수 없습니다."); return; } setDateError(undefined); setPage(0); setFilters(input); };
+  return <div className="min-h-screen bg-[#f7f8fa] p-4 sm:p-6 xl:p-8"><AdminPageHeader title="프로젝트 관리" description="플랫폼에 등록된 모든 프로젝트를 관리합니다." date={new Intl.DateTimeFormat("ko-KR", { dateStyle: "long" }).format(new Date())}/>{counts ? <ProjectStatusTabs value={status} counts={counts} onChange={(v) => { setPage(0); setStatus(v); }}/> : <LoadingState message="프로젝트 집계를 불러오는 중입니다." className="min-h-20"/>}<section className="mt-6 overflow-hidden rounded-xl border border-[#e2e8f0] bg-white"><ProjectFilter value={input} onChange={setInput} onSearch={search} onReset={() => { setInput(EMPTY); setFilters(EMPTY); setStatus(undefined); setPage(0); }} error={dateError} disabled={loading}/>{loading ? <LoadingState className="min-h-64"/> : error ? <ErrorState title="프로젝트를 불러오지 못했습니다" description={error}/> : list?.content.length ? <><div className="overflow-x-auto"><div className="min-w-[980px]"><div className="grid h-11 grid-cols-[110px_2fr_1.2fr_110px_160px_120px_70px] items-center bg-[#f8fafc] px-3 text-[12px] font-semibold text-[#94a3b8]"><span>번호</span><span>프로젝트명</span><span>클라이언트</span><span>상태</span><span>계약 금액</span><span>등록일</span><span>상세</span></div>{list.content.map((p) => <ProjectRow key={p.projectId} project={p}/>)}</div></div><Pagination page={list.page} total={list.totalPages} first={list.first} last={list.last} count={list.totalElements} onPage={setPage}/></> : <div className="py-16 text-center text-[#64748b]">조건에 맞는 프로젝트가 없습니다.</div>}</section></div>;
 }
+function Pagination({ page, total, first, last, count, onPage }: { page: number; total: number; first: boolean; last: boolean; count: number; onPage: (page: number) => void }) { return <div className="flex items-center justify-between px-5 py-4 text-[13px]"><span>총 {count.toLocaleString("ko-KR")}개 · {page + 1}/{Math.max(total, 1)} 페이지</span><div className="flex gap-2"><button disabled={first} onClick={() => onPage(page - 1)} className="rounded-lg border px-4 py-2 disabled:opacity-40">이전</button><button disabled={last} onClick={() => onPage(page + 1)} className="rounded-lg border px-4 py-2 disabled:opacity-40">다음</button></div></div>; }

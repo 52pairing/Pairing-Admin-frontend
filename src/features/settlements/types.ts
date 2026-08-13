@@ -1,21 +1,8 @@
 export type SettlementMemberType = "CLIENT" | "FREELANCER";
-export type SettlementFeeType = "START_FEE" | "COMPLETION_FEE";
-export type SettlementStatus = "PAID" | "PAYABLE" | "OVERDUE" | "FAILED";
-
-export interface Settlement {
-  id: string;
-  projectName: string;
-  memberName: string;
-  memberType: SettlementMemberType;
-  feeType: SettlementFeeType;
-  baseAmount: number;
-  feeRate: number;
-  feeAmount: number;
-  status: SettlementStatus;
-  createdAt: string;
-  dueDate: string;
-  completedAt: string | null;
-}
-
-export type SettlementMemberFilter = "ALL" | SettlementMemberType;
-export type SettlementStatusFilter = "ALL" | SettlementStatus;
+export type SettlementPhase = "DEPOSIT" | "SUCCESS_FEE";
+export type SettlementStatus = "PENDING" | "PAID" | "OVERDUE" | "FAILED" | "CANCELED";
+export interface SettlementSummary { totalRevenue: number; monthlyRevenue: number; revenueMonth: string; pendingAmount: number; pendingCount: number; overdueAmount: number; overdueCount: number; failedAmount: number; failedCount: number; penaltyPaidAmount: number; penaltyPaidCount: number; penaltyPendingAmount: number; penaltyPendingCount: number }
+export interface SettlementListItem { settlementId: number; settlementNo: string; projectId: number; projectTitle: string; payerAccountId: number; memberName: string; payerName: string; companyName: string | null; payerRole: SettlementMemberType; payerRoleLabel: string; phase: SettlementPhase; phaseLabel: string; baseAmount: number; feeRate: number; gradeDiscount: number; effectiveFeeRate: number; feeAmount: number; status: SettlementStatus | null; statusCode: string; statusLabel: string; dueDate: string | null; paidAt: string | null; createdAt: string | null }
+export interface SettlementListResponse { content: SettlementListItem[]; page: number; size: number; totalElements: number; totalPages: number; first: boolean; last: boolean }
+export interface SettlementListParams { status?: SettlementStatus; phase?: SettlementPhase; payerRole?: SettlementMemberType; keyword?: string; fromDate?: string; toDate?: string; page?: number; size?: number }
+export interface SettlementDetail extends SettlementListItem { projectNo: string; projectStatusLabel: string; contractId: number | null; contractNo: string | null; payerEmail: string; payerPhone: string; approvalNo: string | null; failReason: string | null; overdueReason: string | null; paymentMethodId: number | null }

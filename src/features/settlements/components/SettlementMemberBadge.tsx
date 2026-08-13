@@ -2,6 +2,7 @@ import type { SettlementMemberType } from "../types";
 
 interface SettlementMemberBadgeProps {
   type: SettlementMemberType;
+  label?: string;
 }
 
 const memberLabel: Record<SettlementMemberType, string> = {
@@ -16,10 +17,11 @@ const memberStyle: Record<SettlementMemberType, string> = {
 
 export default function SettlementMemberBadge({
   type,
+  label,
 }: SettlementMemberBadgeProps) {
   return (
     <span className={`inline-flex rounded-md px-2 py-1 text-[11px] font-bold ${memberStyle[type]}`}>
-      {memberLabel[type]}
+      {label ?? memberLabel[type]}
     </span>
   );
 }

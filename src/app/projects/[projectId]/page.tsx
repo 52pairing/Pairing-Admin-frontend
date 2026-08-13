@@ -1,79 +1,8 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
-
-import ProjectDetailCard from "@/features/projects/components/ProjectDetailCard";
-import ProjectStatusBadge from "@/features/projects/components/ProjectStatusBadge";
-import { projects } from "@/features/projects/projects";
-
-export function generateStaticParams() {
-  return projects.map((project) => ({
-    projectId: project.id,
-  }));
-}
-
-export default async function ProjectDetailPage({
-  params,
-}: PageProps<"/projects/[projectId]">) {
-  const { projectId } = await params;
-  const project = projects.find((item) => item.id === projectId);
-
-  if (!project) notFound();
-
-  return (
-    <div className="min-h-screen bg-[#f7f8fa] p-4 sm:p-6 xl:p-8">
-      <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-[22px] font-bold text-[#111827] sm:text-[24px]">
-            프로젝트 상세
-          </h1>
-          <p className="mt-2 text-[13px] font-semibold text-[#64748b]">
-            {project.id}
-          </p>
-          <p className="mt-1 text-[13px] text-[#94a3b8]">
-            {project.registeredAt}
-          </p>
-        </div>
-
-        <Link
-          href="/projects"
-          className="inline-flex h-10 w-fit items-center justify-center rounded-lg border border-[#e2e8f0] bg-white px-4 text-[13px] font-semibold text-[#64748b] transition hover:bg-[#f8fafc]"
-        >
-          ← 프로젝트 목록으로
-        </Link>
-      </header>
-
-      <div className="space-y-4">
-        <ProjectDetailCard
-          title="기본 정보"
-          items={[
-            { label: "프로젝트 번호", value: project.id },
-            { label: "클라이언트", value: project.client },
-            { label: "프로젝트명", value: project.name },
-            { label: "카테고리", value: project.category },
-            {
-              label: "상태",
-              value: <ProjectStatusBadge status={project.status} />,
-            },
-          ]}
-        />
-
-        <ProjectDetailCard
-          title="계약 정보"
-          items={[
-            {
-              label: "계약 금액",
-              value: `월 ${project.contractAmount.toLocaleString("ko-KR")}원`,
-            },
-          ]}
-        />
-
-        <ProjectDetailCard
-          title="일정 정보"
-          items={[
-            { label: "등록일", value: project.registeredAt },
-          ]}
-        />
-      </div>
-    </div>
-  );
+"use client";
+import Link from "next/link"; import { useParams } from "next/navigation"; import { useEffect, useState } from "react";
+import { ErrorState } from "@/features/common/components/ErrorState"; import { LoadingState } from "@/features/common/components/Loading"; import { fetchProjectDetail } from "@/features/projects/api"; import ProjectDetailCard from "@/features/projects/components/ProjectDetailCard"; import ProjectStatusBadge from "@/features/projects/components/ProjectStatusBadge"; import type { ProjectDetail } from "@/features/projects/types";
+const money = (v: number) => `${v.toLocaleString("ko-KR")}원`; const date = (v: string | null) => v?.slice(0, 10) ?? "-"; const yesNo = (v: boolean) => v ? "예" : "아니요";
+export default function ProjectDetailPage() { const { projectId } = useParams<{ projectId: string }>(); const id = /^\d+$/.test(projectId) ? Number(projectId) : null; const [data, setData] = useState<ProjectDetail | null>(null); const [error, setError] = useState<string>(); useEffect(() => { if (id === null) return; let active = true; fetchProjectDetail(id).then((v) => { if (active) setData(v); }).catch((e: unknown) => { if (active) setError(e instanceof Error ? e.message : "프로젝트를 불러오지 못했습니다."); }); return () => { active = false; }; }, [id]); if (id === null) return <ErrorState title="올바르지 않은 프로젝트 ID입니다"/>; if (error) return <ErrorState title="프로젝트를 불러오지 못했습니다" description={error}/>; if (!data) return <LoadingState message="프로젝트 상세를 불러오는 중입니다." className="min-h-[60vh]"/>;
+  const positions = data.positions.length ? data.positions.map((p) => `${p.jobCategoryLabel} · ${p.jobRoleLabel} (${p.confirmedCount}/${p.headcount}명, ${p.skillCodes.join(", ") || "기술 없음"})`).join(" / ") : "포지션 미등록";
+  return <div className="min-h-screen bg-[#f7f8fa] p-4 sm:p-6 xl:p-8"><header className="mb-6 flex justify-between"><div><h1 className="text-[24px] font-bold">프로젝트 상세</h1><p className="mt-2 text-[13px] text-[#64748b]">{data.projectNo}</p></div><Link href="/projects" className="h-10 rounded-lg border bg-white px-4 py-2 text-[13px]">← 프로젝트 목록으로</Link></header><div className="space-y-4"><ProjectDetailCard title="프로젝트 기본 정보" items={[{ label: "번호", value: data.projectNo }, { label: "프로젝트명", value: data.title }, { label: "클라이언트", value: <Link href={`/users/${data.clientAccountId}`} className="hover:underline">{data.clientName}</Link> }, { label: "담당자", value: `${data.clientManagerName} · ${data.clientEmail}` }, { label: "상태", value: data.status ? <ProjectStatusBadge status={data.status} label={data.statusLabel}/> : data.statusLabel }, { label: "결제 상태", value: data.paymentStatusLabel }, { label: "예산 총액", value: money(data.budgetAmount) }, { label: "기간", value: `${data.periodValue}${data.periodUnitLabel}` }, { label: "근무방식", value: data.workStyleLabel }, { label: "근무형태", value: data.workFormLabel }, { label: "근무지", value: data.workLocation ?? "-" }, { label: "계약유형", value: data.contractType }, { label: "희망 시작일", value: date(data.startDesiredDate) }, { label: "시작일 협의", value: yesNo(data.startNegotiable) }, { label: "인원", value: `${data.confirmedHeadcount}/${data.totalHeadcount}명` }, { label: "등록일", value: date(data.createdAt) }]}/><ProjectDetailCard title={`포지션 (${data.positions.length}건)`} items={[{ label: "모집 포지션", value: positions, wide: true }]}/>{data.contracts.length ? data.contracts.map((c) => <ProjectDetailCard key={c.contractId} title={`계약 ${c.contractNo}`} items={[{ label: "프리랜서", value: <Link href={`/users/${c.freelancerAccountId}`} className="hover:underline">{c.freelancerName}</Link> }, { label: "상태", value: c.statusLabel }, { label: "월 단가", value: money(c.salaryAmount) }, { label: "총 계약금액", value: money(c.totalAmount) }, { label: "계약 기간", value: `${c.startDate} ~ ${c.endDate}` }, { label: "근무 조건", value: `${c.workStyleLabel} · ${c.workFormLabel}` }]}/>) : <ProjectDetailCard title="계약 정보" items={[{ label: "안내", value: "계약 전" }]}/>}</div></div>;
 }
