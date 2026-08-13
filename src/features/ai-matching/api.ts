@@ -1,4 +1,4 @@
-import{adminRequest}from"@/features/auth/api";import type{AiLog,AiLogParams,Diagnostics,MatchingTargetType,MissingEmbeddingsResponse,PageData}from"./types";
+import{adminRequest}from"@/features/auth/api";import type{AiLog,AiLogParams,Diagnostics,MatchingProjectDiagnostics,MatchingProjectSummary,MatchingTargetType,MissingEmbeddingsResponse,PageData}from"./types";
 const qs=<T extends object>(v:T)=>{const p=new URLSearchParams();Object.entries(v).forEach(([k,x])=>{if(x!==undefined&&x!=="")p.set(k,String(x))});return p};const BASE="/api/v1/admin/matchings";
 export const fetchMissingEmbeddings=(targetType:MatchingTargetType,page:number)=>adminRequest<MissingEmbeddingsResponse>(`${BASE}/embeddings/missing?${qs({targetType,page,size:20})}`);
 export const reindexAllEmbeddings=()=>adminRequest<null>(`${BASE}/embeddings/reindex`,{method:"POST"});
@@ -6,3 +6,5 @@ export const reindexFreelancer=(id:number)=>adminRequest<null>(`${BASE}/embeddin
 export const reindexPosition=(positionId:number,projectId:number)=>adminRequest<null>(`${BASE}/embeddings/positions/${positionId}/reindex?projectId=${projectId}`,{method:"POST"});
 export const fetchAiLogs=(v:AiLogParams)=>adminRequest<PageData<AiLog>>(`${BASE}/ai-logs?${qs(v)}`);
 export const fetchDiagnostics=(projectId:number,positionId:number)=>adminRequest<Diagnostics>(`${BASE}/diagnostics?projectId=${projectId}&positionId=${positionId}`);
+export const fetchMatchingProjects=(onlyIssues:boolean,page:number)=>adminRequest<PageData<MatchingProjectSummary>>(`${BASE}/projects?${qs({onlyIssues,page,size:20})}`);
+export const fetchMatchingProjectDiagnostics=(projectId:number)=>adminRequest<MatchingProjectDiagnostics>(`${BASE}/projects/${projectId}/diagnostics`);
