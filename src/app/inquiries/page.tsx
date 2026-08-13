@@ -1,56 +1,11 @@
 "use client";
-
-import { useMemo, useState } from "react";
-
-import AdminPageHeader from "@/features/common/components/Header";
-import InquiryFilter from "@/features/inquiries/components/InquiryFilter";
-import InquiryRow from "@/features/inquiries/components/InquiryRow";
-import InquiryStatCard from "@/features/inquiries/components/InquiryStatCard";
-import { inquiries } from "@/features/inquiries/inquiries";
-import type { InquiryMemberFilter, InquiryStatusFilter } from "@/features/inquiries/types";
-
-export default function AdminInquiriesPage() {
-  const [keywordInput, setKeywordInput] = useState("");
-  const [memberTypeInput, setMemberTypeInput] = useState<InquiryMemberFilter>("ALL");
-  const [statusInput, setStatusInput] = useState<InquiryStatusFilter>("ALL");
-  const [filters, setFilters] = useState({ keyword: "", memberType: "ALL" as InquiryMemberFilter, status: "ALL" as InquiryStatusFilter });
-
-  const filteredInquiries = useMemo(() => {
-    const keyword = filters.keyword.trim().toLocaleLowerCase("ko-KR");
-    return inquiries.filter((inquiry) =>
-      (keyword === "" || [inquiry.id, inquiry.title, inquiry.author].some((value) => value.toLocaleLowerCase("ko-KR").includes(keyword))) &&
-      (filters.memberType === "ALL" || inquiry.memberType === filters.memberType) &&
-      (filters.status === "ALL" || inquiry.status === filters.status),
-    );
-  }, [filters]);
-
-  const stats = [
-    { label: "전체 문의", value: inquiries.length, tone: "default" as const },
-    { label: "답변 대기", value: inquiries.filter((item) => item.status === "WAITING").length, tone: "waiting" as const },
-    { label: "답변 완료", value: inquiries.filter((item) => item.status === "ANSWERED").length, tone: "answered" as const },
-    { label: "오늘 접수", value: 1, tone: "today" as const },
-  ];
-
-  const handleSearch = () => setFilters({ keyword: keywordInput, memberType: memberTypeInput, status: statusInput });
-  const handleReset = () => {
-    setKeywordInput("");
-    setMemberTypeInput("ALL");
-    setStatusInput("ALL");
-    setFilters({ keyword: "", memberType: "ALL", status: "ALL" });
-  };
-
-  return (
-    <div className="min-h-screen bg-[#f7f8fa] p-4 sm:p-6 xl:p-8">
-      <AdminPageHeader title="1:1 문의 관리" description="사용자가 접수한 1:1 문의를 확인하고 답변할 수 있습니다." date="2026년 8월 11일" />
-      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">{stats.map((stat) => <InquiryStatCard key={stat.label} {...stat} />)}</section>
-      <section className="mt-6"><InquiryFilter keyword={keywordInput} memberType={memberTypeInput} status={statusInput} onKeywordChange={setKeywordInput} onMemberTypeChange={setMemberTypeInput} onStatusChange={setStatusInput} onSearch={handleSearch} onReset={handleReset} /></section>
-      <section className="mt-5 overflow-hidden rounded-xl border border-[#e2e8f0] bg-white shadow-sm">
-        <div className="scrollbar-hidden overflow-x-auto"><div className="min-w-[980px]">
-          <div className="grid h-11 grid-cols-[145px_90px_2.4fr_1.1fr_100px_105px_105px_70px] items-center bg-[#f8fafc] px-4 text-[11px] font-semibold text-[#64748b]"><span>문의번호</span><span>유형</span><span>제목</span><span>작성자</span><span>작성일</span><span>상태</span><span>답변등록일</span><span /></div>
-          {filteredInquiries.length > 0 ? filteredInquiries.map((inquiry) => <InquiryRow key={inquiry.id} inquiry={inquiry} />) : <div className="flex h-40 items-center justify-center text-[14px] font-medium text-[#94a3b8]">조건에 맞는 문의가 없습니다.</div>}
-        </div></div>
-      </section>
-      <p className="mt-3 text-center text-[12px] text-[#94a3b8]">전체 {filteredInquiries.length}건 · 1 / 1 페이지</p>
-    </div>
-  );
+import { useEffect, useState } from "react";
+import AdminPageHeader from "@/features/common/components/Header"; import { ErrorState } from "@/features/common/components/ErrorState"; import { LoadingState } from "@/features/common/components/Loading"; import { fetchInquiries, fetchInquirySummary } from "@/features/inquiries/api"; import InquiryFilter, { type InquiryFilterValue } from "@/features/inquiries/components/InquiryFilter"; import InquiryRow from "@/features/inquiries/components/InquiryRow"; import InquiryStatCard from "@/features/inquiries/components/InquiryStatCard"; import type { InquiryListResponse, InquirySummary } from "@/features/inquiries/types";
+const EMPTY: InquiryFilterValue = { keyword: "" };
+export default function AdminInquiriesPage() { const [summary, setSummary] = useState<InquirySummary | null>(null); const [list, setList] = useState<InquiryListResponse | null>(null); const [input, setInput] = useState(EMPTY); const [filters, setFilters] = useState(EMPTY); const [page, setPage] = useState(0); const [loading, setLoading] = useState(true); const [error, setError] = useState<string>();
+  useEffect(() => { let active = true; fetchInquirySummary().then((v) => { if (active) setSummary(v); }).catch(() => { if (active) setError("문의 요약을 불러오지 못했습니다."); }); return () => { active = false; }; }, []);
+  useEffect(() => { let active = true; fetchInquiries({ ...filters, keyword: filters.keyword?.trim(), page, size: 20 }).then((v) => { if (active) { setList(v); setError(undefined); } }).catch((e: unknown) => { if (active) setError(e instanceof Error ? e.message : "문의 목록을 불러오지 못했습니다."); }).finally(() => { if (active) setLoading(false); }); return () => { active = false; }; }, [filters, page]);
+  const stats = summary ? [{ label: "전체 문의", value: summary.totalCount, tone: "default" as const }, { label: "답변 대기", value: summary.pendingCount, tone: "waiting" as const }, { label: "답변 완료", value: summary.answeredCount, tone: "answered" as const }, { label: "오늘 접수", value: summary.todayCount, tone: "today" as const }] : [];
+  const search = () => { setLoading(true); setPage(0); setFilters(input); }; const reset = () => { setLoading(true); setInput(EMPTY); setFilters(EMPTY); setPage(0); }; const changePage = (v: number) => { setLoading(true); setPage(v); };
+  return <div className="min-h-screen bg-[#f7f8fa] p-4 sm:p-6 xl:p-8"><AdminPageHeader title="1:1 문의 관리" description="사용자가 접수한 문의를 확인하고 답변할 수 있습니다." date={new Intl.DateTimeFormat("ko-KR", { dateStyle: "long" }).format(new Date())}/>{summary ? <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">{stats.map((s) => <InquiryStatCard key={s.label} {...s}/>)}</section> : <LoadingState message="문의 요약을 불러오는 중입니다."/>}<section className="mt-6"><InquiryFilter value={input} onChange={setInput} onSearch={search} onReset={reset} disabled={loading}/></section><section className="mt-5 overflow-hidden rounded-xl border bg-white">{loading ? <LoadingState className="min-h-64"/> : error ? <ErrorState title="문의를 불러오지 못했습니다" description={error}/> : list?.content.length ? <><div className="overflow-x-auto"><div className="min-w-[980px]"><div className="grid h-11 grid-cols-[145px_90px_2.4fr_1.1fr_100px_105px_105px_70px] items-center bg-[#f8fafc] px-4 text-[11px] font-semibold"><span>문의번호</span><span>유형</span><span>제목</span><span>작성자</span><span>작성일</span><span>상태</span><span>답변등록일</span><span/></div>{list.content.map((i) => <InquiryRow key={i.inquiryId} inquiry={i}/>)}</div></div><div className="flex justify-between px-5 py-4 text-[13px]"><span>총 {list.totalElements}건 · {list.page + 1}/{Math.max(list.totalPages,1)} 페이지</span><div className="flex gap-2"><button disabled={list.first} onClick={() => changePage(page - 1)} className="rounded border px-4 py-2 disabled:opacity-40">이전</button><button disabled={list.last} onClick={() => changePage(page + 1)} className="rounded border px-4 py-2 disabled:opacity-40">다음</button></div></div></> : <div className="py-16 text-center">조건에 맞는 문의가 없습니다.</div>}</section></div>;
 }

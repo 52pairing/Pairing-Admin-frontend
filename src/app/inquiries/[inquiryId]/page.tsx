@@ -1,36 +1,10 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
-
-import InquiryAnswerCard from "@/features/inquiries/components/InquiryAnswerCard";
-import InquiryContentCard from "@/features/inquiries/components/InquiryContentCard";
-import InquiryDetailInfo from "@/features/inquiries/components/InquiryDetailInfo";
-import { inquiries } from "@/features/inquiries/inquiries";
-
-export function generateStaticParams() {
-  return inquiries.map((inquiry) => ({ inquiryId: inquiry.id }));
-}
-
-export default async function InquiryDetailPage({ params }: PageProps<"/inquiries/[inquiryId]">) {
-  const { inquiryId } = await params;
-  const inquiry = inquiries.find((item) => item.id === inquiryId);
-
-  if (!inquiry) notFound();
-
-  return (
-    <div className="min-h-screen bg-[#f7f8fa] p-4 sm:p-6 xl:p-8">
-      <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-[22px] font-bold text-[#111827] sm:text-[24px]">1:1 문의 상세</h1>
-          <p className="mt-2 text-[13px] font-semibold text-[#64748b]">{inquiry.id}</p>
-          <p className="mt-1 text-[13px] text-[#94a3b8]">{inquiry.createdAt}</p>
-        </div>
-        <Link href="/inquiries" className="inline-flex h-10 w-fit items-center justify-center rounded-lg border border-[#e2e8f0] bg-white px-4 text-[13px] font-semibold text-[#64748b] transition hover:bg-[#f8fafc]">← 문의 목록으로</Link>
-      </header>
-
-      <div className="grid items-start gap-4 lg:grid-cols-[265px_minmax(0,1fr)]">
-        <InquiryDetailInfo inquiry={inquiry} />
-        <div className="space-y-4"><InquiryContentCard inquiry={inquiry} /><InquiryAnswerCard inquiry={inquiry} /></div>
-      </div>
-    </div>
-  );
+"use client";
+import Link from "next/link"; import { useParams } from "next/navigation"; import { useEffect, useState } from "react";
+import { AdminApiError } from "@/features/auth/api"; import { ErrorState } from "@/features/common/components/ErrorState"; import { LoadingState } from "@/features/common/components/Loading"; import { ConfirmModal } from "@/features/common/components/Modal"; import { answerInquiry, fetchInquiryDetail } from "@/features/inquiries/api"; import type { InquiryDetail, InquiryMemberType } from "@/features/inquiries/types";
+const memberLabel: Record<InquiryMemberType,string> = { CLIENT: "클라이언트", FREELANCER: "프리랜서", ADMIN: "관리자" }; const date = (v: string | null) => v?.slice(0,10) ?? "-";
+export default function InquiryDetailPage() { const { inquiryId } = useParams<{ inquiryId: string }>(); const id = /^\d+$/.test(inquiryId) ? Number(inquiryId) : null; const [data,setData] = useState<InquiryDetail|null>(null); const [error,setError] = useState<string>(); const [answer,setAnswer] = useState(""); const [confirmOpen,setConfirmOpen] = useState(false); const [submitting,setSubmitting] = useState(false); const [answerError,setAnswerError] = useState<string>();
+  useEffect(() => { if (id === null) return; let active=true; fetchInquiryDetail(id).then((v) => { if(active){setData(v);setAnswer(v.answer ?? "");} }).catch((e:unknown) => {if(active)setError(e instanceof Error?e.message:"문의를 불러오지 못했습니다.");}); return()=>{active=false;}; },[id]);
+  const prepare = () => { if(!answer.trim()){setAnswerError("답변을 입력해 주세요.");return;} setAnswerError(undefined);setConfirmOpen(true); }; const submit = async()=>{if(!data)return;setSubmitting(true);try{const updated=await answerInquiry(data.inquiryId,answer.trim());setData(updated);setAnswer(updated.answer??"");setConfirmOpen(false);}catch(e){const api=e instanceof AdminApiError?e:null;setAnswerError(api?`${api.message}${api.traceId?` (traceId: ${api.traceId})`:""}`:"답변을 등록하지 못했습니다.");setConfirmOpen(false);}finally{setSubmitting(false);}};
+  if(id===null)return <ErrorState title="올바르지 않은 문의 ID입니다"/>; if(error)return <ErrorState title="문의를 불러오지 못했습니다" description={error}/>; if(!data)return <LoadingState message="문의 상세를 불러오는 중입니다." className="min-h-[60vh]"/>;
+  return <div className="min-h-screen bg-[#f7f8fa] p-4 sm:p-6 xl:p-8"><header className="mb-6 flex justify-between"><div><h1 className="text-[24px] font-bold">1:1 문의 상세</h1><p className="mt-2 text-[13px] text-[#64748b]">{data.inquiryNo}</p></div><Link href="/inquiries" className="h-10 rounded-lg border bg-white px-4 py-2 text-[13px]">← 문의 목록으로</Link></header><div className="grid items-start gap-4 lg:grid-cols-[265px_minmax(0,1fr)]"><aside className="rounded-xl border bg-white p-5"><h2 className="font-bold">문의 정보</h2><dl className="mt-5 space-y-4">{[["작성자",data.writerName],["회원유형",memberLabel[data.writerRole]],["이메일",data.writerEmail],["작성일",date(data.createdAt)],["답변등록일",date(data.answeredAt)]].map(([label,value])=><div key={label}><dt className="text-[11px] text-[#94a3b8]">{label}</dt><dd className="mt-1 break-words text-[13px] font-semibold">{value}</dd></div>)}</dl></aside><div className="space-y-4"><section className="rounded-xl border bg-white p-6"><p className="text-[12px] font-bold text-[#94a3b8]">문의 내용</p><h2 className="mt-4 text-[18px] font-bold">{data.title}</h2><p className="mt-4 whitespace-pre-wrap rounded-lg bg-[#f8fafc] p-5 text-[14px] leading-7">{data.content}</p>{data.files.length?<div className="mt-4"><h3 className="text-[13px] font-bold">첨부파일</h3><ul className="mt-2 space-y-2">{data.files.map((file)=><li key={file.fileId}><a href={file.url} target="_blank" rel="noreferrer" className="text-[13px] font-semibold text-blue-600 underline">{file.originalName}</a></li>)}</ul></div>:null}</section><section className="rounded-xl border bg-white p-6"><h2 className="text-[15px] font-bold">{data.answer ? "답변 수정" : "답변 등록"}</h2>{data.answer?<p className="mt-2 text-[12px] text-amber-700">답변을 수정하면 사용자 알림이 다시 발송됩니다.</p>:null}<textarea value={answer} onChange={(e)=>setAnswer(e.target.value)} maxLength={2000} rows={8} disabled={submitting} className="mt-4 w-full resize-y rounded-lg border p-4 text-[14px]" placeholder="답변을 입력해 주세요."/><p className="mt-1 text-right text-[12px] text-[#94a3b8]">{answer.length}/2000</p>{answerError?<p role="alert" className="mt-2 text-[13px] text-red-600">{answerError}</p>:null}<button onClick={prepare} disabled={submitting} className="mt-4 h-10 rounded-lg bg-[#102947] px-5 text-[13px] font-bold text-white disabled:opacity-50">{data.answer?"답변 수정":"답변 등록"}</button></section></div></div><ConfirmModal open={confirmOpen} title={data.answer?"답변을 수정할까요?":"답변을 등록할까요?"} description={data.answer?"답변 등록일이 갱신되고 사용자 알림이 다시 발송됩니다.":"등록한 답변은 사용자 문의 화면에 반영됩니다."} confirmText={submitting?"처리 중...":"등록"} cancelText="취소" onConfirm={()=>{if(!submitting)void submit();}} onClose={()=>{if(!submitting)setConfirmOpen(false);}} closeOnOverlayClick={false}/></div>;
 }
