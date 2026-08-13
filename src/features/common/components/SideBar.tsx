@@ -71,6 +71,11 @@ const menuItems = [
     icon: Bot,
   },
   {
+    label: "AI 매칭 관리",
+    href: "/ai-matching",
+    icon: RefreshCw,
+  },
+  {
     label: "1대1문의 관리",
     href: "/inquiries",
     icon: MessageSquare,

@@ -16,3 +16,37 @@
 .scrollbar-hidden::-webkit-scrollbar {
   display: none;
 }
+
+/* 리뷰 목록은 화면 폭 안에서 재배치해 페이지 가로 스크롤을 만들지 않는다. */
+[class*="min-w-[1280px]"] {
+  min-width: 0;
+}
+
+[class*="min-w-[1280px]"] > :first-child,
+.review-list-row {
+  grid-template-columns: 70px 85px 85px 100px minmax(150px, 2.5fr) minmax(110px, 1.4fr) 90px 80px 70px 130px;
+}
+
+@media (max-width: 1279px) {
+  [class*="min-w-[1280px]"] > :first-child {
+    display: none;
+  }
+
+  .review-list-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
+    min-height: 0;
+    padding: 16px;
+  }
+
+  .review-list-row > :nth-child(5),
+  .review-list-row > :nth-child(6),
+  .review-list-row > :nth-child(10) {
+    grid-column: 1 / -1;
+  }
+
+  .review-list-row > :nth-child(10) {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
