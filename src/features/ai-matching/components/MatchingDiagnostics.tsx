@@ -74,15 +74,16 @@ export default function MatchingDiagnostics() {
       : error ? <ErrorState title="프로젝트 목록을 불러오지 못했습니다" description={error} className="min-h-64" />
       : projects?.content.length ? <>
         <div className="overflow-x-auto">
-          <div className="min-w-[1080px]">
-            <div className="grid grid-cols-[80px_2fr_1.2fr_110px_150px_85px_85px_160px_70px] items-center bg-[#f8fafc] px-4 py-3 text-[11px] font-bold text-[#64748b]">
-              <span>ID</span><span>프로젝트</span><span>클라이언트</span><span>상태</span><span>모집 시작</span><span>포지션</span><span>문제</span><span>최근 AI 호출</span><span>상세</span>
+          <div className="min-w-[1180px]">
+            <div className="grid grid-cols-[80px_2fr_1.2fr_110px_120px_150px_85px_85px_160px_70px] items-center bg-[#f8fafc] px-4 py-3 text-[11px] font-bold text-[#64748b]">
+              <span>ID</span><span>프로젝트</span><span>클라이언트</span><span>상태</span><span>결제 상태</span><span>모집 시작</span><span>포지션</span><span>문제</span><span>최근 AI 호출</span><span>상세</span>
             </div>
-            {projects.content.map((project) => <div key={project.projectId} className="grid grid-cols-[80px_2fr_1.2fr_110px_150px_85px_85px_160px_70px] items-center border-t border-[#e2e8f0] px-4 py-3 text-[12px]">
+            {projects.content.map((project) => <div key={project.projectId} className="grid grid-cols-[80px_2fr_1.2fr_110px_120px_150px_85px_85px_160px_70px] items-center border-t border-[#e2e8f0] px-4 py-3 text-[12px]">
               <span className="font-semibold text-[#64748b]">{project.projectId}</span>
               <strong className="truncate pr-3 text-[#111827]" title={project.title}>{project.title}</strong>
               <span className="truncate pr-3" title={project.clientName ?? "회사 정보 없음"}>{project.clientName ?? "회사 정보 없음"}</span>
-              <span>{project.status}</span>
+              <span>{project.statusLabel}</span>
+              <span>{project.paymentStatusLabel}</span>
               <span>{formatDate(project.recruitStartedAt)}</span>
               <span>{project.positionCount}개</span>
               <span><b className={`inline-flex rounded-full border px-2 py-1 text-[11px] ${statusTone(project.issueCount > 0)}`}>{project.issueCount}건</b></span>
@@ -135,7 +136,7 @@ export function MatchingProjectDiagnosticsDetail({ projectId, onBack }: { projec
       : data ? <>
         <header className="rounded-xl border border-[#e2e8f0] bg-white p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div><p className="text-[12px] font-semibold text-[#94a3b8]">PROJECT #{data.project.projectId}</p><h2 className="mt-1 text-xl font-bold text-[#111827]">{data.project.title}</h2><p className="mt-2 text-[13px] text-[#64748b]">{data.project.status} · {data.project.paymentStatus}</p></div>
+            <div><p className="text-[12px] font-semibold text-[#94a3b8]">PROJECT #{data.project.projectId}</p><h2 className="mt-1 text-xl font-bold text-[#111827]">{data.project.title}</h2><p className="mt-2 text-[13px] text-[#64748b]">{data.project.statusLabel} · {data.project.paymentStatusLabel}</p></div>
             <div className="flex flex-wrap gap-2"><SummaryBadge label="프로젝트 스냅샷" value={data.projectSnapshotExists ? "정상" : "없음"} issue={!data.projectSnapshotExists}/><SummaryBadge label="포지션" value={`${data.positionCount}개`}/><SummaryBadge label="문제" value={`${data.issueCount}건`} issue={data.issueCount > 0}/></div>
           </div>
         </header>
@@ -161,7 +162,7 @@ function PositionCard({ position, onReindex }: { position: MatchingPositionDiagn
   const canReindex = position.issues.some((issue) => issue.code === "POSITION_EMBEDDING_MISSING");
   return <article className={`overflow-hidden rounded-xl border bg-white ${hasIssue ? "border-red-200" : "border-[#e2e8f0]"}`}>
     <header className="flex flex-col gap-3 border-b border-[#e2e8f0] p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex items-center gap-3">{hasIssue ? <AlertTriangle className="h-5 w-5 text-red-500"/> : <CheckCircle2 className="h-5 w-5 text-green-600"/>}<div><h3 className="font-bold text-[#111827]">포지션 #{position.position.positionId}</h3><p className="mt-0.5 text-[12px] text-[#64748b]">{position.position.jobCategory} · {position.position.jobRole} · {position.position.status}</p></div></div>
+      <div className="flex items-center gap-3">{hasIssue ? <AlertTriangle className="h-5 w-5 text-red-500"/> : <CheckCircle2 className="h-5 w-5 text-green-600"/>}<div><h3 className="font-bold text-[#111827]">포지션 #{position.position.positionId}</h3><p className="mt-0.5 text-[12px] text-[#64748b]">{position.position.jobCategory} · {position.position.jobRole} · {position.position.statusLabel}</p></div></div>
       {canReindex ? <button type="button" onClick={onReindex} className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#102947] px-4 py-2 text-[12px] font-bold text-white hover:bg-[#17345d]"><RefreshCw className="h-4 w-4"/>재색인</button> : null}
     </header>
     <div className="grid gap-px bg-[#e2e8f0] sm:grid-cols-2 lg:grid-cols-4">
@@ -169,9 +170,9 @@ function PositionCard({ position, onReindex }: { position: MatchingPositionDiagn
       <DiagnosticCell label="포지션 임베딩" value={position.positionEmbeddingExists ? "있음" : "없음"} issue={!position.positionEmbeddingExists}/>
       <DiagnosticCell label="임베딩 모델 / 차원" value={`${position.positionModel ?? "없음"} / ${position.positionEmbeddingDimension ?? "-"}`}/>
       <DiagnosticCell label="프리랜서 후보 풀" value={`${position.freelancerEmbeddingCount.toLocaleString("ko-KR")}명`} issue={position.freelancerEmbeddingCount === 0}/>
-      <DiagnosticCell label="최신 라운드" value={position.round.roundId === null ? "없음" : `R${position.round.roundNo} · ${position.round.roundType} · ${position.round.status}`} issue={position.round.roundId === null}/>
+      <DiagnosticCell label="최신 라운드" value={position.round.roundId === null ? "없음" : `R${position.round.roundNo} · ${position.round.roundTypeLabel ?? "-"} · ${position.round.statusLabel ?? "-"}`} issue={position.round.roundId === null}/>
       <DiagnosticCell label="후보 / 노출 / 요청" value={`${position.counts.candidateCount} / ${position.counts.exposedCandidateCount} / ${position.counts.requestCount}`}/>
-      <DiagnosticCell label="최근 AI 호출" value={position.lastAiLog.status === null ? "호출 기록 없음" : `${position.lastAiLog.status} · ${formatDate(position.lastAiLog.createdAt)}`} issue={position.lastAiLog.status === "FAILED"}/>
+      <DiagnosticCell label="최근 AI 호출" value={position.lastAiLog.status === null ? "호출 기록 없음" : `${position.lastAiLog.statusLabel ?? "-"} · ${formatDate(position.lastAiLog.createdAt)}`} issue={position.lastAiLog.status === "FAILED"}/>
       <DiagnosticCell label="AI 오류" value={position.lastAiLog.errorMessage ?? "-"}/>
     </div>
     <IssueList issues={position.issues}/>
