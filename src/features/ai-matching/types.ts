@@ -11,7 +11,9 @@ export interface MatchingProjectSummary {
   title: string;
   clientName: string | null;
   status: string;
+  statusLabel: string;
   paymentStatus: string;
+  paymentStatusLabel: string;
   recruitStartedAt: string | null;
   positionCount: number;
   issueCount: number;
@@ -27,6 +29,7 @@ export interface MatchingPositionDiagnostics {
   position: {
     positionId: number;
     status: string;
+    statusLabel: string;
     jobCategory: string;
     jobRole: string;
   };
@@ -39,7 +42,9 @@ export interface MatchingPositionDiagnostics {
     roundId: number | null;
     roundNo: number | null;
     roundType: string | null;
+    roundTypeLabel?: string | null;
     status: string | null;
+    statusLabel?: string | null;
   };
   counts: {
     candidateCount: number;
@@ -48,6 +53,7 @@ export interface MatchingPositionDiagnostics {
   };
   lastAiLog: {
     status: string | null;
+    statusLabel?: string | null;
     createdAt: string | null;
     errorMessage: string | null;
   };
@@ -59,7 +65,9 @@ export interface MatchingProjectDiagnostics {
     projectId: number;
     title: string;
     status: string;
+    statusLabel: string;
     paymentStatus: string;
+    paymentStatusLabel: string;
   };
   projectSnapshotExists: boolean;
   positionCount: number;
