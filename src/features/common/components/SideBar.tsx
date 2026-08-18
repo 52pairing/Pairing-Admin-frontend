@@ -126,9 +126,10 @@ export default function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              aria-current={isActive ? "page" : undefined}
               className={`
                 group flex h-[52px] items-center justify-center gap-4 rounded-xl px-3 xl:h-[56px] xl:justify-start xl:px-4
-                text-[15px] font-medium transition-all duration-200
+                text-left text-[15px] font-medium transition-all duration-200
                 ${
                   isActive
                     ? "bg-[#17345d] text-white"
