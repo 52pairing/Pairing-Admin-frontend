@@ -19,3 +19,10 @@ export function updateSiteReviewVisibility(siteReviewId: number, visibility: Vis
     body: JSON.stringify({ visibility, promoted }),
   });
 }
+
+export function updateSiteReviewPromotion(siteReviewId: number, promoted: boolean) {
+  return adminRequest<SiteReview>(`/api/v1/admin/site-reviews/${siteReviewId}/promotion`, {
+    method: "PUT",
+    body: JSON.stringify({ promoted }),
+  });
+}
